@@ -1,0 +1,10 @@
+.gameboard {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  width: 240px;
+}
+.gameboard__row .cell {
+  padding: 4px;
+}/*# sourceMappingURL=styles.css.map */

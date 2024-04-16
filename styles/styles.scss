@@ -1,0 +1,13 @@
+.gameboard {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    width: 240px;
+
+    &__row {
+        .cell {
+            padding: 4px;
+        }
+    }
+}
