@@ -61,7 +61,9 @@ function createGameboard() {
         }
     };
 
-    const getRows = () => {
+    const getCells = () => cells;
+
+    const getRowsContent = () => {
         const rows = [];
         for (let i = 0; i < cells.length; i = i + 3) {
             const row =
@@ -73,7 +75,7 @@ function createGameboard() {
         return rows;
     };
 
-    const getColumns = () => {
+    const getColumnsContent = () => {
         const cols = [];
         for (let i = 0; i < 3; i++) {
             const col =
@@ -85,7 +87,7 @@ function createGameboard() {
         return cols;
     };
 
-    const getDiagonals = () => {
+    const getDiagonalsContent = () => {
         const diagonal1 =
             cells[0].getContent() +
             cells[4].getContent() +
@@ -98,29 +100,40 @@ function createGameboard() {
         return diagonals;
     };
 
-    return { showGameboard, markCell, getRows, getColumns, getDiagonals };
+    return {
+        showGameboard,
+        markCell,
+        getCells,
+        getRowsContent,
+        getColumnsContent,
+        getDiagonalsContent,
+    };
 }
 
 const gameboard = createGameboard();
 
 function createPlayer(id) {
     const playerId = id; // 1 or 2
+    const getPlayerId = () => playerId;
     let plays = 0;
 
-    const mark = (i, gameboard, game) => {
+    const mark = (i) => {
         if (gameboard.markCell(i, playerId)) {
             gameboard.showGameboard();
+
             plays++;
-            if (plays >= 3 && game.checkWin()) {
-                console.log(`You won player ${playerId}!`);
+            if (plays >= 3 && controller.checkWin()) {
+                document.querySelector(
+                    '.winning__message'
+                ).textContent = `You won player ${playerId}!`;
             }
-            game.switchCurrentPlayer();
+            controller.switchCurrentPlayer();
         } else {
             alert('Cell already marked!');
         }
     };
 
-    return { playerId, mark };
+    return { getPlayerId, mark };
 }
 
 const player1 = createPlayer('1');
@@ -135,18 +148,22 @@ function createGameController(gameboard, player1, player2) {
         currentPlayer === player1
             ? (currentPlayer = player2)
             : (currentPlayer = player1);
+
+        document.querySelector(
+            '.player__turn'
+        ).textContent = `Your turn player ${currentPlayer.getPlayerId()}`;
     };
 
     const checkWin = () => {
-        const rows = gameboard.getRows();
+        const rows = gameboard.getRowsContent();
         if (checkRows(0)) {
             return true;
         }
-        const cols = gameboard.getColumns();
+        const cols = gameboard.getColumnsContent();
         if (checkCols(0)) {
             return true;
         }
-        const diagonals = gameboard.getDiagonals();
+        const diagonals = gameboard.getDiagonalsContent();
         if (checkDiagonals(0)) {
             return true;
         } else {
@@ -197,10 +214,29 @@ function createGameController(gameboard, player1, player2) {
 
 const controller = createGameController(gameboard, player1, player2);
 
-// gameboard.showGameboard();
-// player1.mark(0, gameboard, controller);
-// player2.mark(1, gameboard, controller);
-// player1.mark(2, gameboard, controller);
-// player2.mark(4, gameboard, controller);
-// player1.mark(3, gameboard, controller);
-// player2.mark(7, gameboard, controller);
+function createDisplay() {
+    const cells = gameboard.getCells();
+
+    cells.forEach((cell) => {
+        const cellElement = document.createElement('div');
+        cellElement.textContent = cell.getContent();
+        cellElement.dataset.id = cells.indexOf(cell);
+        cellElement.classList.add('display__cell');
+        cellElement.addEventListener('click', (e) => {
+            const clickedCell = e.target;
+            const cellIndex = clickedCell.dataset.id;
+            const currentPlayer = controller.getCurrentPlayer();
+            currentPlayer.mark(cellIndex);
+            clickedCell.textContent = cells[cellIndex].getContent();
+        });
+        document.querySelector('.gameboard__grid').appendChild(cellElement);
+    });
+
+    document.querySelector(
+        '.player__turn'
+    ).textContent = `Your turn player ${controller
+        .getCurrentPlayer()
+        .getPlayerId()}`;
+}
+
+createDisplay();

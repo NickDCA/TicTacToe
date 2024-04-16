@@ -1,13 +1,20 @@
-.gameboard {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    width: 240px;
+.player__turn {
+    color: red;
+}
 
-    &__row {
-        .cell {
-            padding: 4px;
-        }
-    }
+.winning__message {
+    color: blue;
+}
+
+.gameboard__grid {
+    display: grid;
+    grid-template: 50px 50px 50px / 50px 50px 50px;
+    gap: 8px;
+}
+
+.display__cell {
+    border: 2px solid blue;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
