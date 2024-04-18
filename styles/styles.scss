@@ -2,12 +2,24 @@ body {
     text-align: center;
 }
 
+main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
 .player__turn {
-    color: red;
+    &--1 {
+        color: red;
+    }
+    &--2 {
+        color: blue;
+    }
 }
 
 .winning__message {
-    color: blue;
+    color: black;
 }
 
 .gameboard__grid {
@@ -21,4 +33,11 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.rematch__btn {
+    display: none;
+    &--active {
+        display: block;
+    }
 }

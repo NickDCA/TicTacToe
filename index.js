@@ -6,6 +6,10 @@ function createGameboard() {
         let marked = false;
         let content = ' ';
         const getContent = () => content;
+        const resetContent = () => {
+            content = ' ';
+            marked = false;
+        };
 
         const mark = (player) => {
             if (!marked) {
@@ -21,7 +25,7 @@ function createGameboard() {
             }
         };
 
-        return { getContent, mark };
+        return { getContent, mark, resetContent };
     }
 
     for (let index = 0; index < 9; index++) {
@@ -100,6 +104,12 @@ function createGameboard() {
         return diagonals;
     };
 
+    const resetCells = () => {
+        cells.forEach((cell) => {
+            cell.resetContent();
+        });
+    };
+
     return {
         showGameboard,
         markCell,
@@ -107,14 +117,17 @@ function createGameboard() {
         getRowsContent,
         getColumnsContent,
         getDiagonalsContent,
+        resetCells,
     };
 }
 
 const gameboard = createGameboard();
 
-function createPlayer(id) {
-    const playerId = id; // 1 or 2
-    const getPlayerId = () => playerId;
+function createPlayer(name, id) {
+    let playerName = name; // 1 or 2
+    const playerId = id;
+    const getPlayerName = () => playerName;
+    const setPlayerName = (newName) => (playerName = newName);
     let plays = 0;
 
     const mark = (i) => {
@@ -125,7 +138,8 @@ function createPlayer(id) {
             if (plays >= 3 && controller.checkWin()) {
                 document.querySelector(
                     '.winning__message'
-                ).textContent = `You won player ${playerId}!`;
+                ).textContent = `You won player ${playerName}!`;
+                display.toggleRematchBtn();
             }
             controller.switchCurrentPlayer();
         } else {
@@ -133,25 +147,31 @@ function createPlayer(id) {
         }
     };
 
-    return { getPlayerId, mark };
+    return { getPlayerName, setPlayerName, mark };
 }
 
-const player1 = createPlayer('1');
-const player2 = createPlayer('2');
+const player1 = createPlayer('1', '1');
+const player2 = createPlayer('2', '2');
 
-function createGameController(gameboard, player1, player2) {
+function createGameController() {
     let currentPlayer = player1;
 
     const getCurrentPlayer = () => currentPlayer;
 
     const switchCurrentPlayer = () => {
-        currentPlayer === player1
-            ? (currentPlayer = player2)
-            : (currentPlayer = player1);
+        const turnText = document.querySelector('.player__turn');
+        if (currentPlayer === player1) {
+            currentPlayer = player2;
+        } else {
+            currentPlayer = player1;
+        }
+
+        turnText.classList.toggle('player__turn--1');
+        turnText.classList.toggle('player__turn--2');
 
         document.querySelector(
             '.player__turn'
-        ).textContent = `Your turn player ${currentPlayer.getPlayerId()}`;
+        ).textContent = `Your turn ${currentPlayer.getPlayerName()}`;
     };
 
     const checkWin = () => {
@@ -209,34 +229,83 @@ function createGameController(gameboard, player1, player2) {
             }
         }
     };
-    return { checkWin, switchCurrentPlayer, getCurrentPlayer };
+
+    const rematchGame = () => {
+        gameboard.resetCells();
+        display.mapGameboardToDisplay();
+    };
+    return { checkWin, switchCurrentPlayer, getCurrentPlayer, rematchGame };
 }
 
-const controller = createGameController(gameboard, player1, player2);
+const controller = createGameController();
 
 function createDisplay() {
+    // Initialization of DOM display
     const cells = gameboard.getCells();
+    const rematchBtn = document.querySelector('.rematch__btn');
+    const init = () => {
+        // Mapping cells to DOM elements
 
-    cells.forEach((cell) => {
-        const cellElement = document.createElement('div');
-        cellElement.textContent = cell.getContent();
-        cellElement.dataset.id = cells.indexOf(cell);
-        cellElement.classList.add('display__cell');
-        cellElement.addEventListener('click', (e) => {
-            const clickedCell = e.target;
-            const cellIndex = clickedCell.dataset.id;
-            const currentPlayer = controller.getCurrentPlayer();
-            currentPlayer.mark(cellIndex);
-            clickedCell.textContent = cells[cellIndex].getContent();
+        cells.forEach((cell) => {
+            const cellElement = document.createElement('div');
+            cellElement.textContent = cell.getContent();
+            cellElement.dataset.id = cells.indexOf(cell);
+            cellElement.classList.add('display__cell');
+            cellElement.addEventListener('click', (e) => {
+                const clickedCell = e.target;
+                const cellIndex = clickedCell.dataset.id;
+                const currentPlayer = controller.getCurrentPlayer();
+                currentPlayer.mark(cellIndex);
+                clickedCell.textContent = cells[cellIndex].getContent();
+            });
+            document.querySelector('.gameboard__grid').appendChild(cellElement);
         });
-        document.querySelector('.gameboard__grid').appendChild(cellElement);
-    });
+        // Rematch button
 
-    document.querySelector(
-        '.player__turn'
-    ).textContent = `Your turn player ${controller
-        .getCurrentPlayer()
-        .getPlayerId()}`;
+        rematchBtn.addEventListener('click', () => {
+            controller.rematchGame();
+            toggleRematchBtn();
+            document.querySelector('.winning__message').textContent = '';
+        });
+        document.querySelector('main').appendChild(rematchBtn);
+
+        // Form player name inputs
+        const submitNamesBtn = document.querySelector('[data-names]');
+        submitNamesBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const formData = new FormData(document.querySelector('form'));
+            player1.setPlayerName(formData.get('player1'));
+            player2.setPlayerName(formData.get('player2'));
+            document.querySelector(
+                '.player__turn'
+            ).textContent = `Your turn ${controller
+                .getCurrentPlayer()
+                .getPlayerName()}`;
+        });
+
+        // First turn
+        document.querySelector(
+            '.player__turn'
+        ).textContent = `Your turn player ${controller
+            .getCurrentPlayer()
+            .getPlayerName()}`;
+    };
+
+    const mapGameboardToDisplay = () => {
+        cells.forEach((c) => {
+            const cellElement = document.querySelector(
+                `[data-id="${cells.indexOf(c)}"]`
+            );
+            cellElement.textContent = c.getContent();
+        });
+    };
+
+    const toggleRematchBtn = () => {
+        rematchBtn.classList.toggle('rematch__btn--active');
+    };
+
+    return { toggleRematchBtn, mapGameboardToDisplay, init };
 }
 
-createDisplay();
+const display = createDisplay();
+display.init();

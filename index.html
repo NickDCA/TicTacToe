@@ -9,9 +9,31 @@
     <body>
         <header><h1>Tic-Tac-Toe</h1></header>
         <main>
-            <h2 class="player__turn">Player 1 move</h2>
+            <form>
+                <label for="player1">
+                    Player 1 Name:
+                    <input
+                        type="text"
+                        placeholder="Player 1 name"
+                        id="player1"
+                        name="player1"
+                    />
+                </label>
+                <label for="player2">
+                    Player 2 Name:
+                    <input
+                        type="text"
+                        placeholder="Player 2 name"
+                        id="player2"
+                        name="player2"
+                    />
+                </label>
+                <button data-names>Submit</button>
+            </form>
+            <h2 class="player__turn player__turn--1">Player 1 move</h2>
             <p class="winning__message"></p>
             <section class="gameboard__grid"></section>
+            <button class="rematch__btn">Rematch</button>
         </main>
 
         <script src="index.js"></script>
