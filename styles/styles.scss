@@ -1,5 +1,71 @@
+$pirata: 'Pirata One', system-ui;
+$pica-sc: 'IM Fell DW Pica SC', serif;
+
 body {
     text-align: center;
+    background: url('../assets/bg.jpg');
+    background-position: center;
+    background-size: auto;
+    background-repeat: no-repeat;
+    font-family: $pica-sc;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 1rem;
+}
+
+form {
+    font-size: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    .input-name__container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+
+        input {
+            outline: none;
+            font-size: 1.25rem;
+            font-family: $pica-sc;
+            font-weight: 400;
+            font-style: normal;
+        }
+    }
+
+    button[data-names] {
+        /* CSS */
+        background-color: #ccb38d;
+        font-family: $pica-sc;
+        font-size: 1.25rem;
+        letter-spacing: 2px;
+        text-decoration: none;
+        text-transform: uppercase;
+        color: #000;
+        cursor: pointer;
+        border: 3px solid;
+        padding: 0.25em 0.5em;
+
+        position: relative;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+    }
+
+    button[data-names]:active {
+        box-shadow: 0px 0px 0px 0px;
+        top: 5px;
+        left: 5px;
+    }
+
+    @media (min-width: 768px) {
+        button[data-names] {
+            padding: 0.25em 0.75em;
+        }
+    }
 }
 
 main {
@@ -9,30 +75,67 @@ main {
     flex-direction: column;
 }
 
+.game-container {
+    display: none;
+
+    &--active {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+
 .player__turn {
     &--1 {
-        color: red;
+        color: black;
     }
     &--2 {
-        color: blue;
+        color: white;
     }
 }
 
 .winning__message {
     color: black;
+    font-size: 2rem;
 }
 
 .gameboard__grid {
     display: grid;
-    grid-template: 50px 50px 50px / 50px 50px 50px;
-    gap: 8px;
-}
+    grid-template: 128px 128px 128px / 128px 128px 128px;
 
-.display__cell {
-    border: 2px solid blue;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    .display__cell {
+        font-size: 3rem;
+        $cell-border: 4px solid black;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        &--player1 {
+            color: black;
+        }
+
+        &--player2 {
+            color: white;
+        }
+
+        &[data-id='1'],
+        &[data-id='7'] {
+            border-left: $cell-border;
+            border-right: $cell-border;
+        }
+
+        &[data-id='3'],
+        &[data-id='5'] {
+            border-top: $cell-border;
+            border-bottom: $cell-border;
+        }
+
+        &[data-id='4'] {
+            border: $cell-border;
+        }
+    }
 }
 
 .rematch__btn {
@@ -40,4 +143,20 @@ main {
     &--active {
         display: block;
     }
+
+    background-color: #ccb38d;
+    font-family: $pica-sc;
+    font-size: 1.25rem;
+    letter-spacing: 2px;
+    text-decoration: none;
+    text-transform: uppercase;
+    color: #000;
+    cursor: pointer;
+    border: 3px solid;
+    padding: 0.25em 0.5em;
+    margin-top: 1rem;
+
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
 }

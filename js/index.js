@@ -13,7 +13,7 @@ function createGameboard() {
 
         const mark = (player) => {
             if (!marked) {
-                if (player === '1') {
+                if (player === 1) {
                     content = 'X';
                 } else {
                     content = 'O';
@@ -58,11 +58,7 @@ function createGameboard() {
         );
     };
     const markCell = (i, player) => {
-        if (cells[i].mark(player)) {
-            return true;
-        } else {
-            return false;
-        }
+        return cells[i].mark(player);
     };
 
     const getCells = () => cells;
@@ -121,24 +117,35 @@ function createGameboard() {
     };
 }
 
-const gameboard = createGameboard();
-
 function createPlayer(name, id) {
     let playerName = name; // 1 or 2
     const playerId = id;
     const getPlayerName = () => playerName;
     const setPlayerName = (newName) => (playerName = newName);
-    let plays = 0;
+    let wins = 0;
+
+    const getPlayerId = () => playerId;
 
     const mark = (i) => {
-        if (gameboard.markCell(i, playerId)) {
-            gameboard.showGameboard();
+        if (controller.gameboard.markCell(i, playerId)) {
+            controller.gameboard.showGameboard();
 
-            plays++;
-            if (plays >= 3 && controller.checkWin()) {
+            console.log(controller.getPlays());
+            controller.incrementPlays();
+            console.log(controller.getPlays());
+
+            // win scenario
+            if (controller.getPlays() >= 3 && controller.checkWin()) {
                 document.querySelector(
                     '.winning__message'
                 ).textContent = `You won player ${playerName}!`;
+                display.toggleRematchBtn();
+                wins++;
+            } else if (controller.getPlays() === 9) {
+                // draw scenario
+                document.querySelector(
+                    '.winning__message'
+                ).textContent = `It's a draw!`;
                 display.toggleRematchBtn();
             }
             controller.switchCurrentPlayer();
@@ -147,14 +154,21 @@ function createPlayer(name, id) {
         }
     };
 
-    return { getPlayerName, setPlayerName, mark };
+    return { getPlayerName, setPlayerName, getPlayerId, mark };
 }
 
-const player1 = createPlayer('1', '1');
-const player2 = createPlayer('2', '2');
-
 function createGameController() {
+    const player1 = createPlayer('player 1', 1);
+    const player2 = createPlayer('player 2', 2);
     let currentPlayer = player1;
+    const gameboard = createGameboard();
+    let plays = 0;
+
+    const launchGame = (player1Name, player2Name) => {
+        console.log(player1Name + player2Name);
+        player1.setPlayerName(player1Name);
+        player2.setPlayerName(player2Name);
+    };
 
     const getCurrentPlayer = () => currentPlayer;
 
@@ -162,12 +176,13 @@ function createGameController() {
         const turnText = document.querySelector('.player__turn');
         if (currentPlayer === player1) {
             currentPlayer = player2;
+            turnText.classList.remove('player__turn--1');
+            turnText.classList.add('player__turn--2');
         } else {
             currentPlayer = player1;
+            turnText.classList.remove('player__turn--2');
+            turnText.classList.add('player__turn--1');
         }
-
-        turnText.classList.toggle('player__turn--1');
-        turnText.classList.toggle('player__turn--2');
 
         document.querySelector(
             '.player__turn'
@@ -233,16 +248,37 @@ function createGameController() {
     const rematchGame = () => {
         gameboard.resetCells();
         display.mapGameboardToDisplay();
+        console.log(plays);
+        plays = 0;
+        console.log(plays);
+        document.querySelector(
+            '.player__turn'
+        ).textContent = `Your turn ${currentPlayer.getPlayerName()}`;
     };
-    return { checkWin, switchCurrentPlayer, getCurrentPlayer, rematchGame };
+
+    const getPlays = () => plays;
+    const incrementPlays = () => plays++;
+    return {
+        checkWin,
+        switchCurrentPlayer,
+        getCurrentPlayer,
+        rematchGame,
+        launchGame,
+        gameboard,
+        getPlays,
+        incrementPlays,
+    };
 }
 
 const controller = createGameController();
 
 function createDisplay() {
     // Initialization of DOM display
-    const cells = gameboard.getCells();
+    const cells = controller.gameboard.getCells();
     const rematchBtn = document.querySelector('.rematch__btn');
+    const gameboardGrid = document.querySelector('.gameboard__grid');
+    const gameContainer = document.querySelector('.game-container');
+    let isActive = false;
     const init = () => {
         // Mapping cells to DOM elements
 
@@ -255,10 +291,13 @@ function createDisplay() {
                 const clickedCell = e.target;
                 const cellIndex = clickedCell.dataset.id;
                 const currentPlayer = controller.getCurrentPlayer();
+                clickedCell.classList.toggle(
+                    `display__cell--player${currentPlayer.getPlayerId()}`
+                );
                 currentPlayer.mark(cellIndex);
                 clickedCell.textContent = cells[cellIndex].getContent();
             });
-            document.querySelector('.gameboard__grid').appendChild(cellElement);
+            gameboardGrid.appendChild(cellElement);
         });
         // Rematch button
 
@@ -274,13 +313,27 @@ function createDisplay() {
         submitNamesBtn.addEventListener('click', (e) => {
             e.preventDefault();
             const formData = new FormData(document.querySelector('form'));
-            player1.setPlayerName(formData.get('player1'));
-            player2.setPlayerName(formData.get('player2'));
-            document.querySelector(
-                '.player__turn'
-            ).textContent = `Your turn ${controller
-                .getCurrentPlayer()
-                .getPlayerName()}`;
+            if (
+                formData.get('player1') === '' ||
+                formData.get('player2') === ''
+            ) {
+                alert('Empty player names!');
+            } else {
+                controller.launchGame(
+                    formData.get('player1'),
+                    formData.get('player2')
+                );
+                if (!isActive) {
+                    gameContainer.classList.toggle('game-container--active');
+                    isActive = true;
+                }
+
+                document.querySelector(
+                    '.player__turn'
+                ).textContent = `Your turn ${controller
+                    .getCurrentPlayer()
+                    .getPlayerName()}`;
+            }
         });
 
         // First turn
@@ -297,6 +350,10 @@ function createDisplay() {
                 `[data-id="${cells.indexOf(c)}"]`
             );
             cellElement.textContent = c.getContent();
+            cellElement.classList.remove(
+                'display__cell--player1',
+                'display__cell--player2'
+            );
         });
     };
 

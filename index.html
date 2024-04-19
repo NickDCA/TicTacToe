@@ -3,6 +3,12 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=IM+Fell+DW+Pica+SC&family=Pirata+One&display=swap"
+            rel="stylesheet"
+        />
         <link rel="stylesheet" href="styles/styles.css" />
         <title>Document</title>
     </head>
@@ -10,32 +16,37 @@
         <header><h1>Tic-Tac-Toe</h1></header>
         <main>
             <form>
-                <label for="player1">
-                    Player 1 Name:
+                <div class="input-name__container">
+                    <label for="player1">Player 1 Name:</label>
                     <input
                         type="text"
-                        placeholder="Player 1 name"
+                        placeholder="Player 1"
                         id="player1"
                         name="player1"
+                        required
                     />
-                </label>
-                <label for="player2">
-                    Player 2 Name:
+                </div>
+
+                <div class="input-name__container">
+                    <label for="player2">Player 2 Name:</label>
                     <input
                         type="text"
-                        placeholder="Player 2 name"
+                        placeholder="Player 2"
                         id="player2"
                         name="player2"
+                        required
                     />
-                </label>
-                <button data-names>Submit</button>
+                </div>
+                <button data-names type="submit">Start</button>
             </form>
-            <h2 class="player__turn player__turn--1">Player 1 move</h2>
-            <p class="winning__message"></p>
-            <section class="gameboard__grid"></section>
-            <button class="rematch__btn">Rematch</button>
+            <section class="game-container">
+                <h2 class="player__turn player__turn--1">Player 1 move</h2>
+                <p class="winning__message"></p>
+                <section class="gameboard__grid"></section>
+                <button class="rematch__btn">Rematch</button>
+            </section>
         </main>
 
-        <script src="index.js"></script>
+        <script src="js/index.js"></script>
     </body>
 </html>
